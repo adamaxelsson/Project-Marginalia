@@ -110,6 +110,6 @@ for marginalia in marginalia_list:
         else:
             for index, window in enumerate(dividers):
                 word = line[:,window[0]:window[1]]
-                if (window[0]*window[1]) / (line_height*line_width) > 0.05:
+                if (window[0]*window[1]) / (line_height*line_width) > 0.02:
                     cv2.imwrite(output_folder_path + marginalia[:-4] + "_word_" + str(word_counter) + ".png", word)
                     word_counter += 1
