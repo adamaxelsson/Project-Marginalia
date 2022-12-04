@@ -181,6 +181,18 @@ def match_bboxes(bbox_gt, bbox_pred, IOU_THRESH=0.5):
     return idx_gt_actual[sel_valid], idx_pred_actual[sel_valid], ious_actual[sel_valid], label 
 
 
+# match multiple boxes
+def match_multiple_boxes(boxes_target, boxes_predicted):
+    total_iou = 0
+    for i in range(len(boxes_target)):
+        try: 
+            total_iou += abs(bbox_iou(boxes_target[i], boxes_predicted[i]))
+        except IndexError:
+            pass
+    return total_iou/max(len(boxes_target), len(boxes_predicted))
+
+
+
 def collate_fn(batch):
     return tuple(zip(*batch))
 
@@ -269,8 +281,7 @@ def evaluate_visualize_results(results):
             pass
 
         # evaluate predicted_boxes vs target_boxes
-        idxs_true, idxs_pred, ious, labels = match_bboxes(predicted_boxes, target_boxes)
-        iou_mean = ious.mean()
+        iou_mean = match_multiple_boxes(predicted_boxes, target_boxes) 
         iou_list.append(iou_mean)
 
         # visualize predicted boxes and target boxes
