@@ -120,75 +120,19 @@ def bbox_iou(boxA, boxB):
   return iou
 
 
-
-def match_bboxes(bbox_gt, bbox_pred, IOU_THRESH=0.5):
-    '''
-    Given sets of true and predicted bounding-boxes,
-    determine the best possible match.
-    Parameters
-    ----------
-    bbox_gt, bbox_pred : N1x4 and N2x4 np array of bboxes [x1,y1,x2,y2]. 
-      The number of bboxes, N1 and N2, need not be the same.
-    
-    Returns
-    -------
-    (idxs_true, idxs_pred, ious, labels)
-        idxs_true, idxs_pred : indices into gt and pred for matches
-        ious : corresponding IOU value of each match
-        labels: vector of 0/1 values for the list of detections
-    '''
-    n_true = bbox_gt.shape[0]
-    n_pred = bbox_pred.shape[0]
-    MAX_DIST = 1.0
-    MIN_IOU = 0.0
-
-    # NUM_GT x NUM_PRED
-    iou_matrix = np.zeros((n_true, n_pred))
-    for i in range(n_true):
-        for j in range(n_pred):
-            iou_matrix[i, j] = bbox_iou(bbox_gt[i,:], bbox_pred[j,:])
-
-    if n_pred > n_true:
-      # there are more predictions than ground-truth - add dummy rows
-      diff = n_pred - n_true
-      iou_matrix = np.concatenate( (iou_matrix, 
-                                    np.full((diff, n_pred), MIN_IOU)), 
-                                  axis=0)
-
-    if n_true > n_pred:
-      # more ground-truth than predictions - add dummy columns
-      diff = n_true - n_pred
-      iou_matrix = np.concatenate( (iou_matrix, 
-                                    np.full((n_true, diff), MIN_IOU)), 
-                                  axis=1)
-
-    # call the Hungarian matching
-    idxs_true, idxs_pred = scipy.optimize.linear_sum_assignment(1 - iou_matrix)
-
-    if (not idxs_true.size) or (not idxs_pred.size):
-        ious = np.array([])
-    else:
-        ious = iou_matrix[idxs_true, idxs_pred]
-
-    # remove dummy assignments
-    sel_pred = idxs_pred<n_pred
-    idx_pred_actual = idxs_pred[sel_pred] 
-    idx_gt_actual = idxs_true[sel_pred]
-    ious_actual = iou_matrix[idx_gt_actual, idx_pred_actual]
-    sel_valid = (ious_actual > IOU_THRESH)
-    label = sel_valid.astype(int)
-
-    return idx_gt_actual[sel_valid], idx_pred_actual[sel_valid], ious_actual[sel_valid], label 
-
-
-# match multiple boxes
 def match_multiple_boxes(boxes_target, boxes_predicted):
+    """calculates average IOU score for multiple boxes"""
     total_iou = 0
     for i in range(len(boxes_target)):
-        try: 
-            total_iou += abs(bbox_iou(boxes_target[i], boxes_predicted[i]))
-        except IndexError:
-            pass
+        max_iou = 0
+        for j in range(len(boxes_predicted)):
+            try: 
+                curr_iou = bbox_iou(boxes_target[i], boxes_predicted[j])
+                if curr_iou > max_iou:
+                    max_iou = curr_iou
+            except IndexError:
+                pass
+        total_iou += max_iou
     return total_iou/max(len(boxes_target), len(boxes_predicted))
 
 
@@ -289,7 +233,7 @@ def evaluate_visualize_results(results):
 
     # calculate iou accross all results
     iou = sum(iou_list) / len(iou_list)
-    return iou
+    return iou.item()
 
     
 if __name__=="__main__":
