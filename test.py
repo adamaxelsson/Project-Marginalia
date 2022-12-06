@@ -1,3 +1,4 @@
+from __future__ import division
 import torch
 import torchvision
 import pandas as pd
@@ -12,10 +13,7 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 import torchvision.transforms as T
 import random
 import math
-
-from __future__ import division
 import scipy.optimize
-import numpy as np
 
 
 
@@ -100,7 +98,7 @@ def bbox_iou(boxA, boxB):
   # https://www.pyimagesearch.com/2016/11/07/intersection-over-union-iou-for-object-detection/
   # ^^ corrected.
     
-  # Determine the (x, y)-coordinates of the intersection rectangle
+  # Determine the (x, y)-coordinates of the intersection rectangle  
   xA = max(boxA[0], boxB[0])
   yA = max(boxA[1], boxB[1])
   xB = min(boxA[2], boxB[2])
@@ -225,7 +223,7 @@ def evaluate_visualize_results(results):
             pass
 
         # evaluate predicted_boxes vs target_boxes
-        iou_mean = match_multiple_boxes(predicted_boxes, target_boxes) 
+        iou_mean = match_multiple_boxes(target_boxes, predicted_boxes.to("cpu")) 
         iou_list.append(iou_mean)
 
         # visualize predicted boxes and target boxes
@@ -255,7 +253,7 @@ if __name__=="__main__":
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
     model=model.to(device)
 
-    model.load_state_dict(torch.load("faster_r_cnn_weights.pt", map_location=device))
+    model.load_state_dict(torch.load("faster_r_cnn_weights.pt"))#, map_location=device))
 
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -265,24 +263,27 @@ if __name__=="__main__":
     model.eval()
     model.to(device)
 
-    for images, targets, id in val_dl:    
+    with torch.no_grad():
+        for images, targets, id in val_dl:    
+            try:
+                images = list(image.to(device) for image in images)
+                targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+                outputs = model(images)
 
-        images = list(image.to(device) for image in images)
-        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
-        outputs = model(images)
+                for i, image in enumerate(images):
 
-        for i, image in enumerate(images):
+                    boxes = outputs[i]['boxes']
+                    scores = outputs[i]['scores']
+                    labels = outputs[i]['labels']
 
-            boxes = outputs[i]['boxes']
-            scores = outputs[i]['scores']
-            labels = outputs[i]['labels']
-
-            keep = torchvision.ops.nms(boxes, scores, detection_threshold) # the lower, the less we keep
-            boxes = boxes[keep]
-            scores = scores[keep]
-            image_id = id[i]
-        
-            op = (id[i], boxes, scores)
-            results.append(op)
+                    keep = torchvision.ops.nms(boxes, scores, detection_threshold) # the lower, the less we keep
+                    boxes = boxes[keep]
+                    scores = scores[keep]
+                    image_id = id[i]
+                
+                    op = (id[i], boxes, scores)
+                    results.append(op)
+            except Exception as e:
+                print(e)
 
     evaluate_visualize_results(results)
