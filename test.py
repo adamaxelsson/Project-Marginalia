@@ -253,7 +253,7 @@ if __name__=="__main__":
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
     model=model.to(device)
 
-    model.load_state_dict(torch.load("faster_r_cnn_weights.pt"))#, map_location=device))
+    model.load_state_dict(torch.load("faster_r_cnn_weights.pt", map_location=device))
 
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
