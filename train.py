@@ -322,7 +322,7 @@ if __name__=="__main__":
         
 
     # combine original and augmented training data
-    all_train_data = train_data + data_augmented
+    all_train_data = train_data #+ data_augmented
 
 
     train_dataset = MarginaliaDataset(all_train_data)
@@ -333,7 +333,7 @@ if __name__=="__main__":
 
     model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
 
-    device = torch.device('cuda') if torch.cuda.is_available()   else torch.device('cpu')
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     num_classes = 2  # 1 class (marginalia) + background
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
@@ -341,24 +341,29 @@ if __name__=="__main__":
 
     params = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.SGD(params, lr=0.001, momentum=0.9, weight_decay=0.0005)
-    num_epochs = 13
+    num_epochs = 15
 
     model.to(device)
+    batch = 0
     for epoch in range(num_epochs):
         epoch_loss = 0
         for images, targets, _ in train_dl:
-            optimizer.zero_grad()
-            images = list(image.to(device) for image in images)
-            targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+            try:
+                optimizer.zero_grad()
+                images = list(image.to(device) for image in images)
+                targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
-            loss_dict = model(images, targets)
-    #         print(loss_dict)
-            losses = sum(loss for loss in loss_dict.values())
-            epoch_loss += losses.item()
+                loss_dict = model(images, targets)
+      #         print(loss_dict)
+                losses = sum(loss for loss in loss_dict.values())
+                epoch_loss += losses.item()
 
-            losses.backward()
-            optimizer.step()
-            torch.cuda.empty_cache()
+                losses.backward()
+                optimizer.step()
+                torch.cuda.empty_cache()
+                batch += 1
+            except Exception as e:
+                print(e)
         try:
             print(f"loss for epoch {epoch}: {epoch_loss / len(train_dl)}")
         except Exception as e:
