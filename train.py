@@ -4,7 +4,7 @@ import pandas as pd
 import os
 import numpy as np
 from PIL import Image
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
 import cv2 as cv
@@ -284,6 +284,89 @@ def collate_fn(batch):
     return tuple(zip(*batch))
 
 
+# Evaluate Prediction
+def bbox_iou(boxA, boxB):
+  # from https://gist.github.com/AruniRC/c629c2df0e68e23aff7dcaeef87c72d4
+  # https://www.pyimagesearch.com/2016/11/07/intersection-over-union-iou-for-object-detection/
+  # ^^ corrected.
+    
+  # Determine the (x, y)-coordinates of the intersection rectangle  
+  xA = max(boxA[0], boxB[0])
+  yA = max(boxA[1], boxB[1])
+  xB = min(boxA[2], boxB[2])
+  yB = min(boxA[3], boxB[3])
+
+  interW = xB - xA + 1
+  interH = yB - yA + 1
+
+  # Correction: reject non-overlapping boxes
+  if interW <=0 or interH <=0 :
+    return -1.0
+
+  interArea = interW * interH
+  boxAArea = (boxA[2] - boxA[0] + 1) * (boxA[3] - boxA[1] + 1)
+  boxBArea = (boxB[2] - boxB[0] + 1) * (boxB[3] - boxB[1] + 1)
+  iou = interArea / float(boxAArea + boxBArea - interArea)
+  return iou
+
+
+def match_multiple_boxes(boxes_target, boxes_predicted):
+    """calculates average IOU score for multiple boxes"""
+    total_iou = 0
+    for i in range(len(boxes_target)):
+        max_iou = 0
+        for j in range(len(boxes_predicted)):
+            try: 
+                curr_iou = bbox_iou(boxes_target[i], boxes_predicted[j])
+                if curr_iou > max_iou:
+                    max_iou = curr_iou
+            except IndexError:
+                pass
+        total_iou += max_iou
+    return total_iou/max(len(boxes_target), len(boxes_predicted))
+
+
+def evaluate_IOU_score(results):
+    """Calculates average IOU score"""
+
+    boxes = pd.read_csv("rescaled_data.csv")
+    boxes = boxes[["number", "xmin_scaled", "ymin_scaled", "xmax_scaled", "ymax_scaled"]]
+    iou_list = []
+
+    for result in results:
+        id = result[0]
+        # predicted boxes
+        predicted_boxes = result[1]
+        # target boxes
+        sub_df = boxes[boxes["number"] == int(id)]
+        num_boxes = len(sub_df)
+        box_coordinates = []
+        for i in range(num_boxes):
+            sub_sub_df = sub_df.iloc[i]
+            xmin_scaled = int(sub_sub_df["xmin_scaled"])
+            ymin_scaled = int(sub_sub_df["ymin_scaled"])
+            xmax_scaled = int(sub_sub_df["xmax_scaled"])
+            ymax_scaled = int(sub_sub_df["ymax_scaled"])
+            box_coordinates.append(torch.tensor([xmin_scaled, ymin_scaled, xmax_scaled, ymax_scaled], dtype=torch.int32))
+        if num_boxes > 1:
+                target_boxes = torch.stack(box_coordinates, axis=0)
+        elif num_boxes == 1:
+            box_coordinates = box_coordinates[0]
+            target_boxes = box_coordinates.view(1,4)
+        else:
+            pass
+
+        # evaluate predicted_boxes vs target_boxes
+        iou_mean = match_multiple_boxes(target_boxes, predicted_boxes.to("cpu")) 
+        iou_list.append(iou_mean)
+
+        # visualize predicted boxes and target boxes
+        # visualize_prediction_and_target(id, target_boxes, predicted_boxes)
+
+    # calculate iou accross all results
+    iou = sum(iou_list) / len(iou_list)
+    return iou.item()
+
 
 if __name__=="__main__":
     torch.cuda.empty_cache()
@@ -344,7 +427,7 @@ if __name__=="__main__":
     num_epochs = 15
 
     model.to(device)
-    batch = 0
+    IOU_score_per_epoch = []
     for epoch in range(num_epochs):
         epoch_loss = 0
         for images, targets, _ in train_dl:
@@ -354,14 +437,13 @@ if __name__=="__main__":
                 targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
                 loss_dict = model(images, targets)
-      #         print(loss_dict)
+                # print(loss_dict)
                 losses = sum(loss for loss in loss_dict.values())
                 epoch_loss += losses.item()
 
                 losses.backward()
                 optimizer.step()
                 torch.cuda.empty_cache()
-                batch += 1
             except Exception as e:
                 print(e)
         try:
@@ -369,57 +451,96 @@ if __name__=="__main__":
         except Exception as e:
             print(e)
 
-    # save model
-    torch.save(model.state_dict(), "faster_r_cnn_weights.pt")
-
-
-    with torch.no_grad():
-        results=[]
+        # evaluate IOU score for this epoch on test data
         detection_threshold = 0.1 # the lower, the less we keep
         model.eval()
         model.to(device)
-        for images, targets, id in val_dl:    
-            images = list(image.to(device) for image in images)
-            targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
-            #with torch.no_grad():
-            outputs = model(images)
-            for i, image in enumerate(images):
-                boxes = outputs[i]['boxes']
-                scores = outputs[i]['scores']
-                labels = outputs[i]['labels']
+        results = []
+        with torch.no_grad():
+            for images, targets, id in val_dl:    
+                try:
+                    images = list(image.to(device) for image in images)
+                    targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+                    outputs = model(images)
 
-                keep = torchvision.ops.nms(boxes, scores, detection_threshold)
-                boxes = boxes[keep]
-                scores = scores[keep]
-                image_id = id[i]
+                    for i, image in enumerate(images):
+
+                        boxes = outputs[i]['boxes']
+                        scores = outputs[i]['scores']
+                        labels = outputs[i]['labels']
+
+                        keep = torchvision.ops.nms(boxes, scores, detection_threshold) # the lower, the less we keep
+                        boxes = boxes[keep]
+                        scores = scores[keep]
+                        image_id = id[i]
+                    
+                        op = (id[i], boxes, scores)
+                        results.append(op)
+                except Exception as e:
+                    print(e)
+        iou_score = evaluate_IOU_score(results)
+        IOU_score_per_epoch.append(iou_score)
+
+
+    # plot IOU score over epochs
+    plt.plot(IOU_score_per_epoch)
+    plt.xlabel("Epoch")
+    plt.ylabel("IOU score")
+    plt.savefig("iou_score_per_epoch.png")
+    plt.show()
+
+
+    # save model
+#    torch.save(model.state_dict(), "faster_r_cnn_weights.pt")
+
+
+    # with torch.no_grad():
+    #     results=[]
+    #     detection_threshold = 0.1 # the lower, the less we keep
+    #     model.eval()
+    #     model.to(device)
+    #     for images, targets, id in val_dl:    
+    #         images = list(image.to(device) for image in images)
+    #         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+    #         #with torch.no_grad():
+    #         outputs = model(images)
+    #         for i, image in enumerate(images):
+    #             boxes = outputs[i]['boxes']
+    #             scores = outputs[i]['scores']
+    #             labels = outputs[i]['labels']
+
+    #             keep = torchvision.ops.nms(boxes, scores, detection_threshold)
+    #             boxes = boxes[keep]
+    #             scores = scores[keep]
+    #             image_id = id[i]
             
-                op = (id[i], boxes, scores)
-                results.append(op)
+    #             op = (id[i], boxes, scores)
+    #             results.append(op)
 
 
-    def visualize_prediction(imageID, tensor_bounding_box):
-        tensor_bounding_box = tensor_bounding_box.cpu().detach().numpy()
+    # def visualize_prediction(imageID, tensor_bounding_box):
+    #     tensor_bounding_box = tensor_bounding_box.cpu().detach().numpy()
         
-        image = cv.imread(f"./data/rescaled_png_files/{imageID}.png")
-        if image is None:
-            image = cv.imread(f"data/augmented_png_files/{imageID}.png")
-        image = np.asarray(image)
-        for box in tensor_bounding_box:
-            x_min = box[0]
-            y_min = box[1]
-            x_max = box[2]
-            y_max = box[3]
+    #     image = cv.imread(f"./data/rescaled_png_files/{imageID}.png")
+    #     if image is None:
+    #         image = cv.imread(f"data/augmented_png_files/{imageID}.png")
+    #     image = np.asarray(image)
+    #     for box in tensor_bounding_box:
+    #         x_min = box[0]
+    #         y_min = box[1]
+    #         x_max = box[2]
+    #         y_max = box[3]
             
-            color = (0, 0, 255)
-            start_point = (int(x_min), int(y_min))
-            end_point = (int(x_max), int(y_max))
-            thickness = 2
-            cv.rectangle(image, start_point, end_point, color, thickness)
-        cv.imwrite(f'./results/prediction_{imageID}.png', image)
+    #         color = (0, 0, 255)
+    #         start_point = (int(x_min), int(y_min))
+    #         end_point = (int(x_max), int(y_max))
+    #         thickness = 2
+    #         cv.rectangle(image, start_point, end_point, color, thickness)
+    #     cv.imwrite(f'./results/prediction_{imageID}.png', image)
 
 
-    for result in results:
-        id = result[0]
-        boxes = result[1]
-        visualize_prediction(id, boxes)
+    # for result in results:
+    #     id = result[0]
+    #     boxes = result[1]
+    #     visualize_prediction(id, boxes)
 
