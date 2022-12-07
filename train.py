@@ -405,7 +405,7 @@ if __name__=="__main__":
         
 
     # combine original and augmented training data
-    all_train_data = train_data #+ data_augmented
+    all_train_data = train_data + data_augmented
 
 
     train_dataset = MarginaliaDataset(all_train_data)
@@ -424,10 +424,10 @@ if __name__=="__main__":
 
     params = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.SGD(params, lr=0.001, momentum=0.9, weight_decay=0.0005)
-    num_epochs = 15
+    num_epochs = 13
 
     model.to(device)
-    IOU_score_per_epoch = []
+    loss_per_epoch = []
     for epoch in range(num_epochs):
         epoch_loss = 0
         for images, targets, _ in train_dl:
@@ -448,99 +448,20 @@ if __name__=="__main__":
                 print(e)
         try:
             print(f"loss for epoch {epoch}: {epoch_loss / len(train_dl)}")
+            loss_per_epoch.append(epoch_loss / len(train_dl))
         except Exception as e:
             print(e)
 
-        # evaluate IOU score for this epoch on test data
-        detection_threshold = 0.1 # the lower, the less we keep
-        model.eval()
-        model.to(device)
-        results = []
-        with torch.no_grad():
-            for images, targets, id in val_dl:    
-                try:
-                    images = list(image.to(device) for image in images)
-                    targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
-                    outputs = model(images)
-
-                    for i, image in enumerate(images):
-
-                        boxes = outputs[i]['boxes']
-                        scores = outputs[i]['scores']
-                        labels = outputs[i]['labels']
-
-                        keep = torchvision.ops.nms(boxes, scores, detection_threshold) # the lower, the less we keep
-                        boxes = boxes[keep]
-                        scores = scores[keep]
-                        image_id = id[i]
-                    
-                        op = (id[i], boxes, scores)
-                        results.append(op)
-                except Exception as e:
-                    print(e)
-        iou_score = evaluate_IOU_score(results)
-        IOU_score_per_epoch.append(iou_score)
-
 
     # plot IOU score over epochs
-    plt.plot(IOU_score_per_epoch)
+    plt.plot(np.arange(len(loss_per_epoch)), np.array(loss_per_epoch))
     plt.xlabel("Epoch")
-    plt.ylabel("IOU score")
-    plt.savefig("iou_score_per_epoch.png")
+    plt.ylabel("Loss")
+    plt.title("Loss per Epoch")
+    plt.savefig("loss_per_epoch.png")
     plt.show()
 
 
     # save model
-#    torch.save(model.state_dict(), "faster_r_cnn_weights.pt")
-
-
-    # with torch.no_grad():
-    #     results=[]
-    #     detection_threshold = 0.1 # the lower, the less we keep
-    #     model.eval()
-    #     model.to(device)
-    #     for images, targets, id in val_dl:    
-    #         images = list(image.to(device) for image in images)
-    #         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
-    #         #with torch.no_grad():
-    #         outputs = model(images)
-    #         for i, image in enumerate(images):
-    #             boxes = outputs[i]['boxes']
-    #             scores = outputs[i]['scores']
-    #             labels = outputs[i]['labels']
-
-    #             keep = torchvision.ops.nms(boxes, scores, detection_threshold)
-    #             boxes = boxes[keep]
-    #             scores = scores[keep]
-    #             image_id = id[i]
-            
-    #             op = (id[i], boxes, scores)
-    #             results.append(op)
-
-
-    # def visualize_prediction(imageID, tensor_bounding_box):
-    #     tensor_bounding_box = tensor_bounding_box.cpu().detach().numpy()
-        
-    #     image = cv.imread(f"./data/rescaled_png_files/{imageID}.png")
-    #     if image is None:
-    #         image = cv.imread(f"data/augmented_png_files/{imageID}.png")
-    #     image = np.asarray(image)
-    #     for box in tensor_bounding_box:
-    #         x_min = box[0]
-    #         y_min = box[1]
-    #         x_max = box[2]
-    #         y_max = box[3]
-            
-    #         color = (0, 0, 255)
-    #         start_point = (int(x_min), int(y_min))
-    #         end_point = (int(x_max), int(y_max))
-    #         thickness = 2
-    #         cv.rectangle(image, start_point, end_point, color, thickness)
-    #     cv.imwrite(f'./results/prediction_{imageID}.png', image)
-
-
-    # for result in results:
-    #     id = result[0]
-    #     boxes = result[1]
-    #     visualize_prediction(id, boxes)
+    # torch.save(model.state_dict(), "faster_r_cnn_weights.pt")
 
