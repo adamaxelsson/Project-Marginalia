@@ -74,7 +74,7 @@ for marginalia in marginalia_list:
         line_width, line_height = line.shape
         #black/white
         thresh = threshold_otsu(line)
-        binary = line > thresh # higher to handle "weak" or not very "dark" marginalia
+        binary = line > thresh 
         vertical_projection = vertical_projections(binary)
 
         height = line.shape[0]
@@ -117,11 +117,3 @@ for marginalia in marginalia_list:
                 if i==len(divider_indexes)-1:
                     word = line[0:,current_index:]
                     cv2.imwrite(output_folder_path + marginalia[:-4] + "_word_" + str(word_counter) + ".png", word)
-
-            """
-            for index, window in enumerate(dividers):
-                word = line[:,window[0]:window[1]]
-                if (window[0]*window[1]) / (line_height*line_width) > 0.05:
-                    cv2.imwrite(output_folder_path + marginalia[:-4] + "_word_" + str(word_counter) + ".png", word)
-                    word_counter += 1
-            """
