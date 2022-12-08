@@ -71,7 +71,6 @@ for marginalia in marginalia_list:
     #find each word in each line
     word_counter = 0
     for line in lines:
-        line_width, line_height = line.shape
         #black/white
         thresh = threshold_otsu(line)
         binary = line > thresh 
@@ -103,7 +102,6 @@ for marginalia in marginalia_list:
                     whitespace_length = 0 # reset it
 
         divider_indexes = np.array(divider_indexes)
-        dividers = np.column_stack((divider_indexes[:-1],divider_indexes[1:]))
         current_index = 0
         if len(divider_indexes) == 0:
             cv2.imwrite(output_folder_path + marginalia[:-4] + "_word_" + str(word_counter) + ".png", line)
