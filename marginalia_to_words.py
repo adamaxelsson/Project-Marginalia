@@ -45,16 +45,16 @@ for marginalia in marginalia_list:
     #See where there is white-space
     peaks = find_peak_regions(hpp)
     peaks_index = np.array(peaks).astype(int)
-    segmented_img = np.copy(img)
+    img_copy = np.copy(img)
 
     #Fill white space to black
-    r,c = segmented_img.shape
+    r,c = img_copy.shape
     for ri in range(r):
         if ri in peaks_index:
-            segmented_img[ri, :] = 0
+            img_copy[ri, :] = 0
 
     #black-white instead of gray-scale
-    thresh_img = thresholding(segmented_img)
+    thresh_img = thresholding(img_copy)
     #find the contours of our lines
     (contours, heirarchy) = cv2.findContours(thresh_img.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     sorted_contours_lines = sorted(contours, key = lambda ctr : cv2.boundingRect(ctr)[1]) # (x, y, w, h)
