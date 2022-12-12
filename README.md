@@ -1,6 +1,6 @@
 # Project-Marginalia
 
-This is a PyTorch implementation to find marginalias, segment words, and label them using the [AttentionHTR] [1] network. The network to find marginalias is based on a Faster R-CNN network. The network was trained on scanned book pages from Uppsala library.  
+This is a PyTorch implementation to find marginalias, segment words, and label them using the AttentionHTR [1] network. The network to find marginalias is based on a Faster R-CNN network. The network was trained on scanned book pages from Uppsala library.  
 
 ## Dependencies 
 
@@ -17,7 +17,7 @@ python3 -m pip install -r Project-Marginalia/requirements.txt
 ## Demo of our pre-trained model
 
 # Marginalia prediction
-* Download the pre-trained model `faster_r_cnn_weights.pt` from [here] (https://drive.google.com/drive/folders/1_snBot1ZguCXwiy475NzU1Hwr6y_cLt6) and place it into `/Project-Marginalia`.
+* Download the pre-trained model `faster_r_cnn_weights.pt` from https://drive.google.com/drive/folders/1_snBot1ZguCXwiy475NzU1Hwr6y_cLt6 and place it into `/Project-Marginalia`.
 * Create the folder `Project-Marginalia/data/test_images/` and place in them the test images.
 * Create the folder `Project-Marginalia/results/`
 * To predict and visualize the marginalias, run ```python3 test.py```
@@ -30,7 +30,7 @@ python3 -m pip install -r Project-Marginalia/requirements.txt
 
 
 ## Acknowledgements
-* We would like to thank Ekta Vats for her supervision and the Centre for Digital Humanities Uppsala [(CDHU)](https://www.abm.uu.se/cdhu-eng) for offering the dataset.
+* We would like to thank Ekta Vats for her supervision and the Centre for Digital Humanities Uppsala [(CDHU)](https://www.abm.uu.se/cdhu-eng) for offering the labelled dataset.
 
 ## References
 [1]: Dmitrijs Kass and Ekta Vats (2022). AttentionHTR: Handwritten Text Recognition Based on Attention Encoder-Decoder Networks. In *CoRR* abs/2201.09390. https://arxiv.org/abs/2201.09390
