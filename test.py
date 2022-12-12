@@ -11,10 +11,6 @@ import cv2 as cv
 from torch.utils.data import Dataset, DataLoader
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 import torchvision.transforms as T
-import random
-import math
-import scipy.optimize
-
 
 
 class MarginaliaDataset(torch.utils.data.Dataset):
@@ -39,7 +35,6 @@ class MarginaliaDataset(torch.utils.data.Dataset):
 def preprocessing(imageID, path):
     """reads in image and returns preprocessed np array"""
     img = cv.imread(f"{path}{imageID}.png")
-   # img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     img = img/255
     img = torch.tensor(img, dtype=torch.float32)
     img = img.permute(2,0,1) # change channel position
@@ -49,10 +44,8 @@ def preprocessing(imageID, path):
 def generate_data(image_list, box_df, image_path="./data/rescaled_png_files/"):
     data = []
     all_box_coordinates = []
-    #print(image_list)
     for image in image_list:
         image_dict = {}
-        #id = image.removesuffix('.png') 
         if image.endswith(".png"): 
             id = image[:-4]
         else: 

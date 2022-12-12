@@ -227,7 +227,6 @@ class MarginaliaDataset(torch.utils.data.Dataset):
 def preprocessing(imageID, path):
     """reads in image and returns preprocessed np array"""
     img = cv.imread(f"{path}{imageID}.png")
-   # img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     img = img/255
     img = torch.tensor(img, dtype=torch.float32)
     img = img.permute(2,0,1) # change channel position
