@@ -14,8 +14,27 @@ import torchvision.transforms as T
 import math
 import random
 
+
+class MarginaliaDataset(torch.utils.data.Dataset):
+    def __init__(self, data):
+        self.data = data
+        self.n_samples = len(data)
+
+    def __getitem__(self, index):
+        img = self.data[index]["data"]
+        boxes = self.data[index]["boxes"]
+        labels = self.data[index]["labels"]
+        id = self.data[index]["image_id"]
+        target = {}
+        target['boxes'] = boxes
+        target['labels'] = labels
+        return img, target, id
+    
+    def __len__(self):
+        return self.n_samples
+
+
 # Data Augmentation Functions
-# add noise to the image
 def noisy(img, noise_type="gauss"):
     '''
     ### Adding Noise ###
@@ -50,9 +69,9 @@ def noisy(img, noise_type="gauss"):
         image[probs > 1 - (prob / 2)] = white
         return image
 
-# from https://towardsdatascience.com/complete-image-augmentation-in-opencv-31a6b02694f5
 
 def brightness(img, low=0.2, high=0.6):
+    """from https://towardsdatascience.com/complete-image-augmentation-in-opencv-31a6b02694f5"""
     value = random.uniform(low, high)
     hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
     hsv = np.array(hsv, dtype = np.float64)
@@ -117,6 +136,7 @@ def colorjitter(img, cj_type="c"):
         return img
 
 def data_augmentation(image_list, boxes):
+    """Performs data augmentations on train images"""
 
     augmented_data_df = pd.DataFrame(columns=["number", "xmin_scaled", "ymin_scaled", "xmax_scaled", "ymax_scaled"])
     index = 0
@@ -205,25 +225,6 @@ def data_augmentation(image_list, boxes):
     return augmented_data_df
 
 
-class MarginaliaDataset(torch.utils.data.Dataset):
-    def __init__(self, data):
-        self.data = data
-        self.n_samples = len(data)
-
-    def __getitem__(self, index):
-        img = self.data[index]["data"]
-        boxes = self.data[index]["boxes"]
-        labels = self.data[index]["labels"]
-        id = self.data[index]["image_id"]
-        target = {}
-        target['boxes'] = boxes
-        target['labels'] = labels
-        return img, target, id
-    
-    def __len__(self):
-        return self.n_samples
-
-
 def preprocessing(imageID, path):
     """reads in image and returns preprocessed np array"""
     img = cv.imread(f"{path}{imageID}.png")
@@ -236,10 +237,8 @@ def preprocessing(imageID, path):
 def generate_data(image_list, box_df, image_path="./data/rescaled_png_files/"):
     data = []
     all_box_coordinates = []
-    #print(image_list)
     for image in image_list:
         image_dict = {}
-        #id = image.removesuffix('.png') 
         if image.endswith(".png"): 
             id = image[:-4]
         else: 

@@ -17,7 +17,7 @@ python3 -m pip install -r Project-Marginalia/requirements.txt
 ## Demo of our pre-trained model
 
 # Marginalia prediction
-* Download the pre-trained model `faster_r_cnn_weights.pt` from [here] https://drive.google.com/drive/folders/1_snBot1ZguCXwiy475NzU1Hwr6y_cLt6 and place it into `/Project-Marginalia`.
+* Download the pre-trained model `faster_r_cnn_weights.pt` from [here] (https://drive.google.com/drive/folders/1_snBot1ZguCXwiy475NzU1Hwr6y_cLt6) and place it into `/Project-Marginalia`.
 * Create the folder `Project-Marginalia/data/test_images/` and place in them the test images.
 * Create the folder `Project-Marginalia/results/`
 * To predict and visualize the marginalias, run ```python3 test.py```
@@ -28,9 +28,6 @@ python3 -m pip install -r Project-Marginalia/requirements.txt
 # Word labelling with AttentionHTR
 **TODO**
 
-## Train your own models
-**TODO**
-
 
 ## Acknowledgements
 * We would like to thank Ekta Vats for her supervision and the Centre for Digital Humanities Uppsala [(CDHU)](https://www.abm.uu.se/cdhu-eng) for offering the dataset.
@@ -39,7 +36,11 @@ python3 -m pip install -r Project-Marginalia/requirements.txt
 [1]: Dmitrijs Kass and Ekta Vats (2022). AttentionHTR: Handwritten Text Recognition Based on Attention Encoder-Decoder Networks. In *CoRR* abs/2201.09390. https://arxiv.org/abs/2201.09390
 
 ## Contact
+
 Adam Axelsson (...)
-Jonas Frankemölle (jonas.frankemolle.9234@student.uu.se)
+
 Liang Cheng (...)
+
+Jonas Frankemölle (jonas.frankemolle.9234@student.uu.se)
+
 Ekta Vats (ekta.vats@abm.uu.se)
