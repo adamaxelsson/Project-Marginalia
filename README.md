@@ -36,9 +36,9 @@ python3 -m pip install -r Project-Marginalia/requirements.txt
 
 ## Contact
 
-Adam Axelsson (...)
+Adam Axelsson (adam.axelsson.4529@student.uu.se)
 
-Liang Cheng (...)
+Liang Cheng (liang.cheng.8263@student.uu.se)
 
 Jonas Frankemölle (jonas.frankemolle.9234@student.uu.se)
 
