@@ -16,16 +16,16 @@ python3 -m pip install -r Project-Marginalia/requirements.txt
 
 ## Demo of our pre-trained model
 
-# Marginalia prediction
+### Marginalia prediction
 * Download the pre-trained model `faster_r_cnn_weights.pt` from https://drive.google.com/drive/folders/1_snBot1ZguCXwiy475NzU1Hwr6y_cLt6 and place it into `/Project-Marginalia`.
 * Create the folder `Project-Marginalia/data/test_images/` and place in them the test images.
 * Create the folder `Project-Marginalia/results/`
 * To predict and visualize the marginalias, run ```python3 test.py```
 
-# Marginalia Segmentation
+### Marginalia Segmentation
 **TODO**
 
-# Word labelling with AttentionHTR
+### Word labelling with AttentionHTR
 * To label the words with AttentionHTR, follow the instructions from https://github.com/dmitrijsk/AttentionHTR
 
 ## Acknowledgements
