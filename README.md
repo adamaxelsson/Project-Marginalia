@@ -26,8 +26,7 @@ python3 -m pip install -r Project-Marginalia/requirements.txt
 **TODO**
 
 # Word labelling with AttentionHTR
-**TODO**
-
+* To label the words with AttentionHTR, follow the instructions from https://github.com/dmitrijsk/AttentionHTR
 
 ## Acknowledgements
 * We would like to thank Ekta Vats for her supervision and the Centre for Digital Humanities Uppsala [(CDHU)](https://www.abm.uu.se/cdhu-eng) for offering the labelled dataset.
