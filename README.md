@@ -17,10 +17,10 @@ python3 -m pip install -r Project-Marginalia/requirements.txt
 ## Demo of our pre-trained model
 
 ### Marginalia prediction
-* Download the pre-trained model `faster_r_cnn_weights.pt` from https://drive.google.com/drive/folders/1_snBot1ZguCXwiy475NzU1Hwr6y_cLt6 and place it into `/Project-Marginalia`.
-* Create the folder `Project-Marginalia/data/test_images/` and place in them the test images.
-* Create the folder `Project-Marginalia/results/`
-* To predict and visualize the marginalias, run ```python3 test.py```
+* Download the pre-trained model `faster_r_cnn_weights.pt` from https://drive.google.com/drive/folders/1_snBot1ZguCXwiy475NzU1Hwr6y_cLt6 and place it into `/Project-Marginalia/model/`.
+* Create the folder `Project-Marginalia/model/data/test_images/` and place in them the test images.
+* Create the folder `Project-Marginalia/model/results/`
+* To predict and visualize the marginalias, run ```python3 model/test.py```
 
 ### Marginalia Segmentation
 **TODO**
