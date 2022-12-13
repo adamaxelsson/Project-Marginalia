@@ -23,7 +23,8 @@ python3 -m pip install -r Project-Marginalia/requirements.txt
 * To predict and visualize the marginalias, run ```python3 model/test.py```
 
 ### Marginalia Segmentation
-**TODO**
+* If you want to use your model on your own set of images, use the image_to_bboxes.py script. In it you will have to add the path to your model, folder of your dataset, and the location where you want the predicted marginalia to be saved. Then run 'python3 image_to_bboxes.py'.
+* If you want to segment a set of marginalia to individual words, use the marginalia_to_words.py script. In it you will have to add the path to a folder containing images of predicted marginalia, as well as the folder where you want the results to be saved. Then run 'python3 marginalia_to_words.py'.
 
 ### Word labelling with AttentionHTR
 * To label the words with AttentionHTR, follow the instructions from https://github.com/dmitrijsk/AttentionHTR
