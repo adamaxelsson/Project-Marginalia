@@ -35,8 +35,6 @@ python3 -m pip install -r Project-Marginalia/requirements.txt
 * The authors would like to thank [Ekta Vats](https://www.ektavats.se/) for her supervision, and the Centre for Digital Humanities Uppsala ([CDHU](https://www.abm.uu.se/cdhu-eng)) and Uppsala University Library ([Alvin](https://www.alvin-portal.org/alvin/view.jsf?pid=alvin-organisation%3A16&dswid=-1828)) for offering the dataset.
 
 
-* We would like to thank Ekta Vats for her supervision and the Centre for Digital Humanities Uppsala [(CDHU)](https://www.abm.uu.se/cdhu-eng) for offering the labelled dataset.
-
 ## References
 [1]: Dmitrijs Kass and Ekta Vats. "AttentionHTR: Handwritten Text Recognition Based on Attention Encoder-Decoder Networks." *International Workshop on Document Analysis Systems*. Springer, Cham, 2022. [Link](https://link.springer.com/chapter/10.1007/978-3-031-06555-2_34) [Code](https://github.com/dmitrijsk/AttentionHTR)
 
