@@ -327,7 +327,7 @@ def match_multiple_boxes(boxes_target, boxes_predicted):
 def evaluate_IOU_score(results):
     """Calculates average IOU score"""
 
-    boxes = pd.read_csv("model/rescaled_data.csv")
+    boxes = pd.read_csv("rescaled_data.csv")
     boxes = boxes[["number", "xmin_scaled", "ymin_scaled", "xmax_scaled", "ymax_scaled"]]
     iou_list = []
 
@@ -370,7 +370,7 @@ if __name__=="__main__":
     torch.cuda.empty_cache()
 
     # original data
-    boxes = pd.read_csv("model/rescaled_data.csv")
+    boxes = pd.read_csv("rescaled_data.csv")
     boxes = boxes[["number", "xmin_scaled", "ymin_scaled", "xmax_scaled", "ymax_scaled"]]
     image_list = os.listdir('./data/rescaled_png_files/')
 
