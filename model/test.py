@@ -188,7 +188,7 @@ def visualize_prediction_and_target(imageID, tensor_target, tensor_predicted):
 def evaluate_visualize_results(results):
     """Calculates average IOU and visualizes the results"""
 
-    boxes = pd.read_csv("rescaled_data.csv")
+    boxes = pd.read_csv("model/rescaled_data.csv")
     boxes = boxes[["number", "xmin_scaled", "ymin_scaled", "xmax_scaled", "ymax_scaled"]]
     iou_list = []
 
@@ -231,7 +231,7 @@ if __name__=="__main__":
 
     image_list = os.listdir('./data/test_images/')
 
-    boxes = pd.read_csv("rescaled_data.csv")
+    boxes = pd.read_csv("model/rescaled_data.csv")
     boxes = boxes[["number", "xmin_scaled", "ymin_scaled", "xmax_scaled", "ymax_scaled"]]
     test_data = generate_data(image_list, boxes, "./data/rescaled_png_files/")
 
