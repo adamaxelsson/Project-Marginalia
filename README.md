@@ -2,9 +2,9 @@
 
 PyTorch implementation of a Handwritten Text Recognition (HTR) system that focuses on automatic detection and recognition of handwritten marginalia texts i.e., text written in margins or handwritten notes. Faster R-CNN network is used for detection of marginalia and [AttentionHTR](https://github.com/dmitrijsk/AttentionHTR) is used for word recognition. The data comes from early book collections (printed) found in the Uppsala University Library, with handwritten marginalia texts.
 
-For more details, refer to our paper at [arXiv](https://arxiv.org/pdf/2303.05929.pdf).
+For more details, refer to our paper [here](https://aclanthology.org/2024.latechclfl-1.12/), or [arXiv](https://arxiv.org/pdf/2303.05929.pdf).
 
-Liang Cheng, Jonas Frankemölle, Adam Axelsson and Ekta Vats, Uncovering the Handwritten Text in the Margins: End-to-end Handwritten Text Detection and Recognition. To appear in the Proceedings of the 8th Joint SIGHUM Workshop on Computational Linguistics for Cultural Heritage, Social Sciences, Humanities and Literature, co-located with the 18th Conference of the European Chapter of the Association for Computational Linguistics (EACL 2024).
+Liang Cheng, Jonas Frankemölle, Adam Axelsson and Ekta Vats, Uncovering the Handwritten Text in the Margins: End-to-end Handwritten Text Detection and Recognition. In Proceedings of the 8th Joint SIGHUM Workshop on Computational Linguistics for Cultural Heritage, Social Sciences, Humanities and Literature (LaTeCH-CLfL 2024), pp. 111-120. (co-located with the 18th Conference of the European Chapter of the Association for Computational Linguistic (EACL 2024)).
 
 ## Dependencies 
 
